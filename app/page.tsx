@@ -11,12 +11,18 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
+import { useDebounce } from "@/hooks/useDebounce";
 import { useEffect, useState } from "react";
 
 export default function Home() {
   const [search, setSearch] = useState("");
+  const debouncedSearch = useDebounce(search, 500);
   const [selected, setSelected] = useState("repositories");
   const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    console.log(debouncedSearch);
+  }, [debouncedSearch]);
 
   useEffect(() => {
     setIsLoading(false);

@@ -21,7 +21,7 @@ import type {
   User,
   SearchResponse,
 } from "@/types/github";
-import { RefreshCw, Search } from "lucide-react";
+import { RefreshCw, Search, X } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
 
 export default function Home() {
@@ -130,6 +130,13 @@ export default function Home() {
     }
   };
 
+  const handleClear = () => {
+    setSearch("");
+    setSearchResults(null);
+    setError(null);
+    setCurrentPage(1);
+  };
+
   // Reset search when search type changes
   useEffect(() => {
     setSearchResults(null);
@@ -185,12 +192,24 @@ export default function Home() {
                 </SelectContent>
               </Select>
 
-              <Input
-                placeholder={`Search GitHub ${selected}...`}
-                className="flex-1 h-12 text-lg"
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-              />
+              <div className="relative flex-1">
+                <Input
+                  placeholder={`Search GitHub ${selected}...`}
+                  className="h-12 text-lg pr-10"
+                  value={search}
+                  onChange={(e) => setSearch(e.target.value)}
+                />
+                {search && (
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="absolute right-2 top-1/2 transform -translate-y-1/2 h-8 w-8 p-0 hover:bg-muted"
+                    onClick={handleClear}
+                  >
+                    <X className="h-4 w-4" />
+                  </Button>
+                )}
+              </div>
               <ModeToggle />
             </div>
 

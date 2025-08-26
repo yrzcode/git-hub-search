@@ -26,6 +26,41 @@ import {
 } from "@/components/ui/table";
 import type { Repository } from "@/types/github";
 
+const generatePageNumbers = (currentPage: number, totalPages: number) => {
+  const pages: Array<{ value: number | string; key: string }> = [];
+  const showPages = 7;
+
+  if (totalPages <= showPages) {
+    for (let i = 1; i <= totalPages; i++) {
+      pages.push({ value: i, key: `page-${i}` });
+    }
+  } else {
+    if (currentPage <= 4) {
+      for (let i = 1; i <= 5; i++) {
+        pages.push({ value: i, key: `page-${i}` });
+      }
+      pages.push({ value: "...", key: "ellipsis-end" });
+      pages.push({ value: totalPages, key: `page-${totalPages}` });
+    } else if (currentPage >= totalPages - 3) {
+      pages.push({ value: 1, key: "page-1" });
+      pages.push({ value: "...", key: "ellipsis-start" });
+      for (let i = totalPages - 4; i <= totalPages; i++) {
+        pages.push({ value: i, key: `page-${i}` });
+      }
+    } else {
+      pages.push({ value: 1, key: "page-1" });
+      pages.push({ value: "...", key: "ellipsis-start" });
+      for (let i = currentPage - 1; i <= currentPage + 1; i++) {
+        pages.push({ value: i, key: `page-${i}` });
+      }
+      pages.push({ value: "...", key: "ellipsis-end" });
+      pages.push({ value: totalPages, key: `page-${totalPages}` });
+    }
+  }
+
+  return pages;
+};
+
 export const columns: ColumnDef<Repository>[] = [
   {
     accessorKey: "full_name",
@@ -149,6 +184,9 @@ export function ResultTable({
     React.useState<VisibilityState>({});
   const [rowSelection, setRowSelection] = React.useState({});
 
+  const totalPages = Math.ceil(Math.min(totalCount, 1000) / 10);
+  const pageNumbers = generatePageNumbers(currentPage, totalPages);
+
   const table = useReactTable({
     data,
     columns,
@@ -249,7 +287,7 @@ export function ResultTable({
             </>
           )}
         </div>
-        <div className="space-x-2">
+        <div className="flex items-center space-x-2">
           <Button
             variant="outline"
             size="sm"
@@ -258,14 +296,37 @@ export function ResultTable({
           >
             Previous
           </Button>
+
+          <div className="flex items-center space-x-1">
+            {pageNumbers.map((pageItem) => (
+              <React.Fragment key={pageItem.key}>
+                {pageItem.value === "..." ? (
+                  <span className="px-2 py-1 text-sm text-muted-foreground">
+                    ...
+                  </span>
+                ) : (
+                  <Button
+                    variant={
+                      pageItem.value === currentPage ? "default" : "outline"
+                    }
+                    size="sm"
+                    onClick={() => onPageChange(pageItem.value as number)}
+                    disabled={isLoading}
+                    className="min-w-[2.5rem]"
+                  >
+                    {pageItem.value}
+                  </Button>
+                )}
+              </React.Fragment>
+            ))}
+          </div>
+
           <Button
             variant="outline"
             size="sm"
             onClick={() => onPageChange(currentPage + 1)}
             disabled={
-              isLoading ||
-              data.length === 0 ||
-              currentPage >= Math.ceil(Math.min(totalCount, 1000) / 10)
+              isLoading || data.length === 0 || currentPage >= totalPages
             }
           >
             Next

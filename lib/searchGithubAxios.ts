@@ -3,7 +3,6 @@ import type {
   SearchResponse,
   Repository,
   CodeSearchItem,
-  Issue,
   CommitSearchItem,
   User,
 } from "../types/github";
@@ -95,39 +94,6 @@ export async function searchCode(
   );
   data.items.forEach((file: CodeSearchItem, i: number) => {
     console.log(`${i + 1}. ${file.name} @ ${file.repository.full_name}`);
-  });
-  return data;
-}
-
-// Search issues
-export async function searchIssues(
-  query: string = "is:open is:issue bug repo:facebook/react",
-  sort:
-    | "comments"
-    | "reactions"
-    | "reactions-+1"
-    | "reactions--1"
-    | "reactions-smile"
-    | "reactions-thinking_face"
-    | "reactions-heart"
-    | "reactions-tada"
-    | "interactions"
-    | "created"
-    | "updated" = "created",
-  order: "asc" | "desc" = "desc",
-  per_page: number = 5,
-  page: number = 1,
-): Promise<SearchResponse<Issue>> {
-  const data = await searchGithub<Issue>(
-    "issues",
-    query,
-    sort,
-    order,
-    per_page,
-    page,
-  );
-  data.items.forEach((issue: Issue) => {
-    console.log(`#${issue.number}: ${issue.title}`);
   });
   return data;
 }

@@ -27,7 +27,6 @@ import {
 import type {
   Repository,
   CodeSearchItem,
-  Issue,
   CommitSearchItem,
   User,
 } from "@/types/github";
@@ -183,62 +182,7 @@ const createColumns = (searchType: string): ColumnDef<any>[] => {
   switch (searchType) {
     case "repositories":
       return repositoryColumns;
-    case "issues":
-      return [
-        {
-          accessorKey: "title",
-          header: "Issue",
-          cell: ({ row }) => {
-            const issue = row.original as Issue;
-            return (
-              <div className="space-y-1 text-left">
-                <div className="font-medium">
-                  <a
-                    href={issue.html_url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="hover:underline flex items-center gap-1"
-                  >
-                    #{issue.number}: {issue.title}
-                    <ExternalLink className="h-3 w-3" />
-                  </a>
-                </div>
-                {issue.body && (
-                  <p className="text-sm text-muted-foreground line-clamp-2 text-left">
-                    {issue.body?.substring(0, 100) || "No description"}...
-                  </p>
-                )}
-              </div>
-            );
-          },
-        },
-        {
-          accessorKey: "state",
-          header: "State",
-          cell: ({ row }) => {
-            const state = row.getValue("state") as string;
-            return (
-              <span
-                className={`px-2 py-1 rounded text-xs ${
-                  state === "open"
-                    ? "bg-green-100 text-green-800"
-                    : "bg-red-100 text-red-800"
-                }`}
-              >
-                {state}
-              </span>
-            );
-          },
-        },
-        {
-          accessorKey: "comments",
-          header: "Comments",
-          cell: ({ row }) => {
-            const comments = row.getValue("comments") as number;
-            return <div className="text-left">{comments || 0}</div>;
-          },
-        },
-      ];
+
     case "code":
       return [
         {

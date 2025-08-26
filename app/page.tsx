@@ -17,7 +17,6 @@ import { searchGithub } from "@/lib/searchGithubAxios";
 import type {
   Repository,
   CodeSearchItem,
-  Issue,
   CommitSearchItem,
   User,
   SearchResponse,
@@ -31,7 +30,7 @@ export default function Home() {
   const [selected, setSelected] = useState("repositories");
   const [isLoading, setIsLoading] = useState(true);
   const [searchResults, setSearchResults] = useState<SearchResponse<
-    Repository | CodeSearchItem | Issue | CommitSearchItem | User
+    Repository | CodeSearchItem | CommitSearchItem | User
   > | null>(null);
   const [isSearching, setIsSearching] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
@@ -53,7 +52,7 @@ export default function Home() {
       setError(null);
       try {
         let data: SearchResponse<
-          Repository | CodeSearchItem | Issue | CommitSearchItem | User
+          Repository | CodeSearchItem | CommitSearchItem | User
         >;
 
         switch (selected) {
@@ -67,16 +66,7 @@ export default function Home() {
               page
             );
             break;
-          case "issues":
-            data = await searchGithub<Issue>(
-              "issues",
-              query,
-              "created",
-              "desc",
-              10,
-              page
-            );
-            break;
+
           case "code":
             data = await searchGithub<CodeSearchItem>(
               "code",
@@ -187,7 +177,7 @@ export default function Home() {
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="repositories">Repositories</SelectItem>
-                  <SelectItem value="issues">Issues</SelectItem>
+
                   <SelectItem value="code">Code</SelectItem>
                   <SelectItem value="commits">Commits</SelectItem>
                   <SelectItem value="users">Users</SelectItem>

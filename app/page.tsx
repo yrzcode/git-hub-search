@@ -166,7 +166,7 @@ export default function Home() {
         <div className="text-center space-y-8">
           <div className="space-y-4">
             <h1 className="text-5xl font-bold tracking-tight flex items-center justify-center gap-3">
-              <div className="w-16 h-16 bg-gradient-to-br from-gray-700 to-gray-900 rounded-full flex items-center justify-center shadow-lg">
+              <div className="w-16 h-16 bg-gradient-to-br from-blue-400 to-blue-600 dark:from-blue-900 dark:to-gray-950 rounded-full flex items-center justify-center shadow-lg">
                 <Image
                   src="/github-icon.svg"
                   alt="GitHub"
@@ -175,7 +175,9 @@ export default function Home() {
                   className="brightness-0 invert"
                 />
               </div>
-              GitHub Search
+              <span className="bg-gradient-to-r from-blue-600 via-purple-600 to-blue-800 dark:from-blue-400 dark:via-purple-400 dark:to-blue-600 bg-clip-text text-transparent">
+                GitHub Search
+              </span>
             </h1>
             <p className="text-xl text-muted-foreground flex items-center justify-center gap-2">
               <Search className="h-5 w-5" />

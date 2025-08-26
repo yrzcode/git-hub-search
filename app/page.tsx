@@ -5,7 +5,7 @@ import { Input } from "@/components/ui/input";
 export default function Home() {
   return (
     <div className="min-h-screen flex items-center justify-center bg-background">
-      <main className="w-full max-w-2xl mx-auto px-6">
+      <main className="w-full max-w-4xl mx-auto px-6">
         <div className="text-center space-y-8">
           <div className="space-y-4">
             <h1 className="text-5xl font-bold tracking-tight">
@@ -16,7 +16,7 @@ export default function Home() {
             </p>
           </div>
 
-          <div className="w-full max-w-lg mx-auto space-y-4">
+          <div className="w-full max-w-2xl mx-auto space-y-4">
             <div className="flex items-center gap-3">
               <Input
                 placeholder="Search GitHub repositories..."
@@ -24,6 +24,7 @@ export default function Home() {
               />
               <ModeToggle />
             </div>
+
             <div>
               <ResultTable />
             </div>

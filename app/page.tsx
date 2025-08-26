@@ -34,7 +34,7 @@ export default function Home() {
           </div>
 
           <div className="w-full max-w-2xl mx-auto space-y-4">
-            <div className="flex items-center gap-3 pb-4">
+            <div className="flex items-center gap-3">
               <Select value={selected} onValueChange={setSelected}>
                 <SelectTrigger className="text-lg !h-12 flex items-center w-40">
                   {isLoading ? (

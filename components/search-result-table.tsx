@@ -82,10 +82,11 @@ export const repositoryColumns: ColumnDef<Repository>[] = [
         </Button>
       );
     },
+    size: 300,
     cell: ({ row }) => {
       const repo = row.original;
       return (
-        <div className="space-y-1">
+        <div className="space-y-1 text-left pl-3 max-w-xs">
           <div className="font-medium">
             <a
               href={repo.html_url}
@@ -98,7 +99,7 @@ export const repositoryColumns: ColumnDef<Repository>[] = [
             </a>
           </div>
           {repo.description && (
-            <div className="text-sm text-muted-foreground max-w-md truncate">
+            <div className="text-sm text-muted-foreground max-w-md text-left truncate">
               {repo.description}
             </div>
           )}
@@ -112,7 +113,7 @@ export const repositoryColumns: ColumnDef<Repository>[] = [
     cell: ({ row }) => {
       const language = row.getValue("language") as string;
       return (
-        <div className="text-sm">
+        <div className="text-sm text-left pl-3">
           {language || <span className="text-muted-foreground">N/A</span>}
         </div>
       );
@@ -125,7 +126,7 @@ export const repositoryColumns: ColumnDef<Repository>[] = [
         <Button
           variant="ghost"
           onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-          className="justify-end w-full"
+          className="justify-start w-full"
         >
           Stars
           <ArrowUpDown />
@@ -135,7 +136,7 @@ export const repositoryColumns: ColumnDef<Repository>[] = [
     cell: ({ row }) => {
       const stars = row.getValue("stargazers_count") as number;
       return (
-        <div className="text-right flex items-center justify-end gap-1">
+        <div className="text-left flex items-center justify-start gap-1 pl-3">
           <Star className="h-3 w-3" />
           {stars?.toLocaleString() || "0"}
         </div>
@@ -149,7 +150,7 @@ export const repositoryColumns: ColumnDef<Repository>[] = [
         <Button
           variant="ghost"
           onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-          className="justify-end w-full"
+          className="justify-start w-full"
         >
           Forks
           <ArrowUpDown />
@@ -159,7 +160,7 @@ export const repositoryColumns: ColumnDef<Repository>[] = [
     cell: ({ row }) => {
       const forks = row.getValue("forks") as number;
       return (
-        <div className="text-right flex items-center justify-end gap-1">
+        <div className="text-left flex items-center justify-start gap-1 pl-3">
           <GitFork className="h-3 w-3" />
           {forks?.toLocaleString() || "0"}
         </div>
@@ -190,7 +191,7 @@ const createColumns = (searchType: string): ColumnDef<any>[] => {
           cell: ({ row }) => {
             const issue = row.original as Issue;
             return (
-              <div className="space-y-1">
+              <div className="space-y-1 text-left">
                 <div className="font-medium">
                   <a
                     href={issue.html_url}
@@ -203,8 +204,8 @@ const createColumns = (searchType: string): ColumnDef<any>[] => {
                   </a>
                 </div>
                 {issue.body && (
-                  <p className="text-sm text-muted-foreground line-clamp-2">
-                    {issue.body.substring(0, 100)}...
+                  <p className="text-sm text-muted-foreground line-clamp-2 text-left">
+                    {issue.body?.substring(0, 100) || "No description"}...
                   </p>
                 )}
               </div>
@@ -234,7 +235,7 @@ const createColumns = (searchType: string): ColumnDef<any>[] => {
           header: "Comments",
           cell: ({ row }) => {
             const comments = row.getValue("comments") as number;
-            return <div className="text-center">{comments || 0}</div>;
+            return <div className="text-left">{comments || 0}</div>;
           },
         },
       ];
@@ -246,7 +247,7 @@ const createColumns = (searchType: string): ColumnDef<any>[] => {
           cell: ({ row }) => {
             const code = row.original as CodeSearchItem;
             return (
-              <div className="space-y-1">
+              <div className="space-y-1 text-left">
                 <div className="font-medium">
                   <a
                     href={code.html_url}
@@ -258,7 +259,7 @@ const createColumns = (searchType: string): ColumnDef<any>[] => {
                     <ExternalLink className="h-3 w-3" />
                   </a>
                 </div>
-                <p className="text-sm text-muted-foreground">
+                <p className="text-sm text-muted-foreground text-left truncate">
                   {code.path || "No path"}
                 </p>
               </div>
@@ -268,17 +269,20 @@ const createColumns = (searchType: string): ColumnDef<any>[] => {
         {
           accessorKey: "repository.full_name",
           header: "Repository",
+          size: 250,
           cell: ({ row }) => {
             const code = row.original as CodeSearchItem;
             return (
-              <a
-                href={code.repository?.html_url}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="hover:underline text-blue-600"
-              >
-                {code.repository?.full_name || "Unknown repository"}
-              </a>
+              <div className="text-left max-w-xs">
+                <a
+                  href={code.repository?.html_url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="hover:underline text-blue-600 truncate block"
+                >
+                  {code.repository?.full_name || "Unknown repository"}
+                </a>
+              </div>
             );
           },
         },
@@ -286,24 +290,33 @@ const createColumns = (searchType: string): ColumnDef<any>[] => {
     case "commits":
       return [
         {
-          accessorKey: "commit.message",
+          accessorKey: "sha",
           header: "Commit",
           cell: ({ row }) => {
             const commit = row.original as CommitSearchItem;
             return (
-              <div className="space-y-1">
-                <div className="font-medium">
-                  <a
-                    href={commit.html_url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="hover:underline flex items-center gap-1"
-                  >
-                    {commit.sha.substring(0, 7)}
-                    <ExternalLink className="h-3 w-3" />
-                  </a>
-                </div>
-                <p className="text-sm text-muted-foreground line-clamp-2">
+              <div className="font-medium text-left">
+                <a
+                  href={commit.html_url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="hover:underline flex items-center gap-1"
+                >
+                  {commit.sha?.substring(0, 7) || "unknown"}
+                  <ExternalLink className="h-3 w-3" />
+                </a>
+              </div>
+            );
+          },
+        },
+        {
+          accessorKey: "commit.message",
+          header: "Message",
+          cell: ({ row }) => {
+            const commit = row.original as CommitSearchItem;
+            return (
+              <div className="max-w-md">
+                <p className="text-sm line-clamp-2 text-left">
                   {commit.commit?.message || "No message"}
                 </p>
               </div>
@@ -315,7 +328,11 @@ const createColumns = (searchType: string): ColumnDef<any>[] => {
           header: "Author",
           cell: ({ row }) => {
             const commit = row.original as CommitSearchItem;
-            return <div>{commit.commit?.author?.name || "Unknown"}</div>;
+            return (
+              <div className="text-left">
+                {commit.commit?.author?.name || "Unknown"}
+              </div>
+            );
           },
         },
         {
@@ -324,14 +341,16 @@ const createColumns = (searchType: string): ColumnDef<any>[] => {
           cell: ({ row }) => {
             const commit = row.original as CommitSearchItem;
             return (
-              <a
-                href={commit.repository?.html_url}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="hover:underline text-blue-600"
-              >
-                {commit.repository?.full_name || "Unknown repository"}
-              </a>
+              <div className="text-left">
+                <a
+                  href={commit.repository?.html_url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="hover:underline text-blue-600 truncate block"
+                >
+                  {commit.repository?.full_name || "Unknown repository"}
+                </a>
+              </div>
             );
           },
         },
@@ -344,22 +363,26 @@ const createColumns = (searchType: string): ColumnDef<any>[] => {
           cell: ({ row }) => {
             const user = row.original as User;
             return (
-              <div className="flex items-center space-x-3">
+              <div className="flex items-center space-x-3 text-left max-w-xs">
                 <div className="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center text-sm font-medium">
-                  {user.login.charAt(0).toUpperCase()}
+                  {user.login?.charAt(0)?.toUpperCase() || "?"}
                 </div>
-                <div>
+                <div className="text-left">
                   <a
-                    href={user.html_url}
+                    href={user.html_url || "#"}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="font-medium hover:underline flex items-center gap-1"
                   >
-                    {user.login}
+                    <span className="truncate">
+                      {user.login || "Unknown user"}
+                    </span>
                     <ExternalLink className="h-3 w-3" />
                   </a>
                   {user.name && (
-                    <p className="text-sm text-muted-foreground">{user.name}</p>
+                    <p className="text-sm text-muted-foreground text-left truncate">
+                      {user.name}
+                    </p>
                   )}
                 </div>
               </div>
@@ -372,15 +395,17 @@ const createColumns = (searchType: string): ColumnDef<any>[] => {
           cell: ({ row }) => {
             const type = row.getValue("type") as string;
             return (
-              <span
-                className={`px-2 py-1 rounded text-xs ${
-                  type === "User"
-                    ? "bg-blue-100 text-blue-800"
-                    : "bg-purple-100 text-purple-800"
-                }`}
-              >
-                {type}
-              </span>
+              <div className="text-left">
+                <span
+                  className={`px-2 py-1 rounded text-xs ${
+                    type === "User"
+                      ? "bg-blue-100 text-blue-800"
+                      : "bg-purple-100 text-purple-800"
+                  }`}
+                >
+                  {type}
+                </span>
+              </div>
             );
           },
         },
@@ -391,7 +416,7 @@ const createColumns = (searchType: string): ColumnDef<any>[] => {
             const score = row.getValue("score") as number;
             const percentage = Math.round(score * 100);
             return (
-              <div className="text-center">
+              <div className="text-left">
                 <div className="text-sm font-medium">{percentage}%</div>
                 <div className="w-full bg-gray-200 rounded-full h-1.5 mt-1">
                   <div
@@ -458,7 +483,7 @@ export function ResultTable({
               <TableRow key={headerGroup.id}>
                 {headerGroup.headers.map((header) => {
                   return (
-                    <TableHead key={header.id}>
+                    <TableHead key={header.id} className="px-6">
                       {header.isPlaceholder
                         ? null
                         : flexRender(
@@ -479,7 +504,7 @@ export function ResultTable({
                   data-state={row.getIsSelected() && "selected"}
                 >
                   {row.getVisibleCells().map((cell) => (
-                    <TableCell key={cell.id}>
+                    <TableCell className="px-6" key={cell.id}>
                       {flexRender(
                         cell.column.columnDef.cell,
                         cell.getContext()
@@ -492,7 +517,7 @@ export function ResultTable({
               <TableRow>
                 <TableCell
                   colSpan={columns.length}
-                  className="h-24 text-center"
+                  className="h-24 text-left px-6"
                 >
                   {isLoading ? (
                     <div className="flex items-center justify-center gap-2">

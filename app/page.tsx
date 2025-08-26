@@ -164,7 +164,7 @@ export default function Home() {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-background">
-      <main className="w-full max-w-4xl mx-auto px-6">
+      <main className="w-full max-w-7xl mx-auto px-6">
         <div className="text-center space-y-8">
           <div className="space-y-4">
             <h1 className="text-5xl font-bold tracking-tight">GitHub Search</h1>

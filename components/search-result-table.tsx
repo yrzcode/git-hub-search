@@ -338,10 +338,11 @@ const createColumns = (searchType: string): ColumnDef<any>[] => {
         {
           accessorKey: "repository.full_name",
           header: "Repository",
+          size: 250,
           cell: ({ row }) => {
             const commit = row.original as CommitSearchItem;
             return (
-              <div className="text-left">
+              <div className="text-left max-w-xs">
                 <a
                   href={commit.repository?.html_url}
                   target="_blank"

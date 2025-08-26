@@ -21,7 +21,7 @@ import type {
   User,
   SearchResponse,
 } from "@/types/github";
-import { RefreshCw } from "lucide-react";
+import { RefreshCw, Search } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
 
 export default function Home() {
@@ -158,7 +158,8 @@ export default function Home() {
         <div className="text-center space-y-8">
           <div className="space-y-4">
             <h1 className="text-5xl font-bold tracking-tight">GitHub Search</h1>
-            <p className="text-xl text-muted-foreground">
+            <p className="text-xl text-muted-foreground flex items-center justify-center gap-2">
+              <Search className="h-5 w-5" />
               Search for GitHub {selected}
             </p>
           </div>

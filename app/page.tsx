@@ -145,7 +145,7 @@ export default function Home() {
     if (debouncedSearch.trim()) {
       performSearch(debouncedSearch, 1);
     }
-  }, [selected, performSearch]);
+  }, [selected, performSearch, debouncedSearch]);
 
   useEffect(() => {
     if (!debouncedSearch.trim()) {

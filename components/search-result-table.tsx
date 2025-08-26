@@ -438,7 +438,7 @@ export function ResultTable({
   return (
     <div className="w-full max-w-6xl mx-auto">
       <div className="overflow-hidden rounded-md border">
-        <Table>
+        <Table className="min-h-[650px]">
           <TableHeader>
             {table.getHeaderGroups().map((headerGroup) => (
               <TableRow key={headerGroup.id}>
@@ -457,7 +457,7 @@ export function ResultTable({
               </TableRow>
             ))}
           </TableHeader>
-          <TableBody>
+          <TableBody className="min-h-[650px]">
             {table.getRowModel().rows?.length ? (
               table.getRowModel().rows.map((row) => (
                 <TableRow
@@ -481,12 +481,14 @@ export function ResultTable({
                   className="h-24 text-left px-6"
                 >
                   {isLoading ? (
-                    <div className="flex items-center justify-center gap-2">
-                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-current"></div>
-                      Searching...
+                    <div className="flex items-center justify-center gap-2 h-full">
+                      <div className="flex items-center gap-2">
+                        <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-current"></div>
+                        Searching...
+                      </div>
                     </div>
                   ) : !searchQuery.trim() ? (
-                    <div className="text-center py-8">
+                    <div className="text-center py-32 h-full flex flex-col justify-center">
                       <h3 className="text-lg font-medium text-muted-foreground mb-2">
                         Welcome to GitHub Search
                       </h3>
@@ -495,7 +497,9 @@ export function ResultTable({
                       </p>
                     </div>
                   ) : (
-                    "No results found."
+                    <div className="text-center py-32 min-h-[650px] flex flex-col justify-center">
+                      <p className="text-muted-foreground">No results found.</p>
+                    </div>
                   )}
                 </TableCell>
               </TableRow>

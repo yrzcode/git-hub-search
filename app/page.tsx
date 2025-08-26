@@ -248,6 +248,7 @@ export default function Home() {
                 currentPage={currentPage}
                 onPageChange={handlePageChange}
                 searchType={selected}
+                searchQuery={debouncedSearch}
               />
             </div>
           </div>

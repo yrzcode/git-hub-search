@@ -175,6 +175,7 @@ interface ResultTableProps {
   currentPage: number;
   onPageChange: (page: number) => void;
   searchType: string;
+  searchQuery?: string;
 }
 
 // Create dynamic columns based on search type
@@ -386,6 +387,7 @@ export function ResultTable({
   currentPage,
   onPageChange,
   searchType,
+  searchQuery = "",
 }: ResultTableProps) {
   const [sorting, setSorting] = React.useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
@@ -468,6 +470,15 @@ export function ResultTable({
                     <div className="flex items-center justify-center gap-2">
                       <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-current"></div>
                       Searching...
+                    </div>
+                  ) : !searchQuery.trim() ? (
+                    <div className="text-center py-8">
+                      <h3 className="text-lg font-medium text-muted-foreground mb-2">
+                        Welcome to GitHub Search
+                      </h3>
+                      <p className="text-sm text-muted-foreground">
+                        Search something to get started
+                      </p>
                     </div>
                   ) : (
                     "No results found."

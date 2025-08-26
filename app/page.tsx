@@ -22,6 +22,7 @@ import type {
   SearchResponse,
 } from "@/types/github";
 import { RefreshCw, Search, X } from "lucide-react";
+import Image from "next/image";
 import { useCallback, useEffect, useState } from "react";
 
 export default function Home() {
@@ -145,7 +146,7 @@ export default function Home() {
     if (debouncedSearch.trim()) {
       performSearch(debouncedSearch, 1);
     }
-  }, [selected, performSearch, debouncedSearch]);
+  }, [performSearch, debouncedSearch]);
 
   useEffect(() => {
     if (!debouncedSearch.trim()) {
@@ -164,7 +165,18 @@ export default function Home() {
       <main className="w-full max-w-7xl mx-auto px-6">
         <div className="text-center space-y-8">
           <div className="space-y-4">
-            <h1 className="text-5xl font-bold tracking-tight">GitHub Search</h1>
+            <h1 className="text-5xl font-bold tracking-tight flex items-center justify-center gap-3">
+              <div className="w-16 h-16 bg-gradient-to-br from-gray-700 to-gray-900 rounded-full flex items-center justify-center shadow-lg">
+                <Image
+                  src="/github-icon.svg"
+                  alt="GitHub"
+                  width={40}
+                  height={40}
+                  className="brightness-0 invert"
+                />
+              </div>
+              GitHub Search
+            </h1>
             <p className="text-xl text-muted-foreground flex items-center justify-center gap-2">
               <Search className="h-5 w-5" />
               Search for GitHub {selected}

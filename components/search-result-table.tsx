@@ -376,7 +376,21 @@ const createColumns = (searchType: string): ColumnDef<any>[] => {
         },
       ];
     default:
-      return repositoryColumns;
+      // Return a basic column configuration for unknown search types
+      return [
+        {
+          accessorKey: "name",
+          header: "Name",
+          cell: ({ row }) => {
+            const item = row.original;
+            return (
+              <div className="text-left pl-3">
+                {item.name || item.title || item.full_name || "Unknown"}
+              </div>
+            );
+          },
+        },
+      ];
   }
 };
 

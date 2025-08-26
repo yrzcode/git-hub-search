@@ -130,9 +130,17 @@ interface ResultTableProps {
   data: Repository[];
   isLoading: boolean;
   totalCount: number;
+  currentPage: number;
+  onPageChange: (page: number) => void;
 }
 
-export function ResultTable({ data, isLoading, totalCount }: ResultTableProps) {
+export function ResultTable({
+  data,
+  isLoading,
+  totalCount,
+  currentPage,
+  onPageChange,
+}: ResultTableProps) {
   const [sorting, setSorting] = React.useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
     []
@@ -223,8 +231,21 @@ export function ResultTable({ data, isLoading, totalCount }: ResultTableProps) {
         <div className="text-muted-foreground flex-1 text-sm">
           {totalCount > 0 && (
             <>
-              Showing {table.getRowModel().rows.length} of{" "}
-              {totalCount.toLocaleString()} repositories
+              Page {currentPage} • Showing{" "}
+              {data.length > 0 ? (
+                <>
+                  {((currentPage - 1) * 10 + 1).toLocaleString()}-
+                  {((currentPage - 1) * 10 + data.length).toLocaleString()}
+                </>
+              ) : (
+                "0"
+              )}{" "}
+              of {Math.min(totalCount, 1000).toLocaleString()} repositories
+              {totalCount > 1000 && (
+                <span className="text-xs ml-1 opacity-75">
+                  (GitHub API limit: max 1000 results)
+                </span>
+              )}
             </>
           )}
         </div>
@@ -232,16 +253,20 @@ export function ResultTable({ data, isLoading, totalCount }: ResultTableProps) {
           <Button
             variant="outline"
             size="sm"
-            onClick={() => table.previousPage()}
-            disabled={!table.getCanPreviousPage()}
+            onClick={() => onPageChange(currentPage - 1)}
+            disabled={currentPage <= 1 || isLoading}
           >
             Previous
           </Button>
           <Button
             variant="outline"
             size="sm"
-            onClick={() => table.nextPage()}
-            disabled={!table.getCanNextPage()}
+            onClick={() => onPageChange(currentPage + 1)}
+            disabled={
+              isLoading ||
+              data.length === 0 ||
+              currentPage >= Math.ceil(Math.min(totalCount, 1000) / 10)
+            }
           >
             Next
           </Button>

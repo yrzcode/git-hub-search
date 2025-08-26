@@ -2,6 +2,7 @@
 
 import { ResultTable } from "@/components/search-result-table";
 import { ModeToggle } from "@/components/theme-toggle";
+import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
   Select,
@@ -14,7 +15,8 @@ import { Separator } from "@/components/ui/separator";
 import { useDebounce } from "@/hooks/useDebounce";
 import { searchRepositories } from "@/lib/searchGithubAxios";
 import type { Repository, SearchResponse } from "@/types/github";
-import { useEffect, useState } from "react";
+import { RefreshCw } from "lucide-react";
+import { useCallback, useEffect, useState } from "react";
 
 export default function Home() {
   const [search, setSearch] = useState("");
@@ -24,32 +26,58 @@ export default function Home() {
   const [searchResults, setSearchResults] =
     useState<SearchResponse<Repository> | null>(null);
   const [isSearching, setIsSearching] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     setIsLoading(false);
   }, []);
 
-  useEffect(() => {
-    if (!debouncedSearch.trim()) {
+  const performSearch = useCallback(async (query: string, page: number = 1) => {
+    if (!query.trim()) {
       setSearchResults(null);
+      setError(null);
       return;
     }
 
-    const fetchData = async () => {
-      setIsSearching(true);
-      try {
-        const data = await searchRepositories(debouncedSearch);
-        setSearchResults(data);
-      } catch (error) {
-        console.error("Search failed:", error);
-        setSearchResults(null);
-      } finally {
-        setIsSearching(false);
-      }
-    };
+    setIsSearching(true);
+    setError(null);
+    try {
+      const data = await searchRepositories(query, "stars", "desc", 10, page);
+      setSearchResults(data);
+    } catch (error: any) {
+      console.error("Search failed:", error);
+      setSearchResults(null);
+      setError(error.message || "Search failed, please try again later");
+    } finally {
+      setIsSearching(false);
+    }
+  }, []);
 
-    fetchData();
-  }, [debouncedSearch]);
+  const handlePageChange = (newPage: number) => {
+    if (debouncedSearch.trim() && newPage > 0) {
+      setCurrentPage(newPage);
+      performSearch(debouncedSearch, newPage);
+    }
+  };
+
+  const handleRefresh = () => {
+    if (debouncedSearch.trim()) {
+      performSearch(debouncedSearch, currentPage);
+    }
+  };
+
+  useEffect(() => {
+    if (!debouncedSearch.trim()) {
+      setSearchResults(null);
+      setCurrentPage(1);
+      setError(null);
+      return;
+    }
+
+    setCurrentPage(1);
+    performSearch(debouncedSearch, 1);
+  }, [debouncedSearch, performSearch]);
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-background">
@@ -94,11 +122,58 @@ export default function Home() {
 
             <Separator />
 
+            {error && (
+              <div className="bg-red-50 dark:bg-red-950 border border-red-200 dark:border-red-800 rounded-md p-4 mb-4">
+                <div className="flex justify-between items-start">
+                  <div className="flex-1 ml-3">
+                    <h3 className="text-sm font-medium text-red-800 dark:text-red-200">
+                      Search Error
+                    </h3>
+                    <div className="mt-2 text-sm text-red-700 dark:text-red-300">
+                      <p>{error}</p>
+                      {error.includes("rate limit") && (
+                        <div className="mt-2">
+                          <p className="mt-1">
+                            Please{" "}
+                            <a
+                              href="https://github.com/settings/tokens"
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="underline"
+                            >
+                              generate a GitHub Personal Access Token
+                            </a>{" "}
+                            (public_repo permission) and add it as
+                            NEXT_PUBLIC_GITHUB_TOKEN=your_token_here in a
+                            .env.local file.
+                          </p>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                  <Button
+                    onClick={handleRefresh}
+                    disabled={isSearching || !debouncedSearch.trim()}
+                    size="sm"
+                    variant="outline"
+                    className="flex items-center gap-1 text-red-700 dark:text-red-300 border-red-300 dark:border-red-700 hover:bg-red-100 dark:hover:bg-red-900"
+                  >
+                    <RefreshCw
+                      className={`h-3 w-3 ${isSearching ? "animate-spin" : ""}`}
+                    />
+                    Retry
+                  </Button>
+                </div>
+              </div>
+            )}
+
             <div>
               <ResultTable
                 data={searchResults?.items || []}
                 isLoading={isSearching}
                 totalCount={searchResults?.total_count || 0}
+                currentPage={currentPage}
+                onPageChange={handlePageChange}
               />
             </div>
           </div>

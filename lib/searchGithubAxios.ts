@@ -1,4 +1,3 @@
-import axios from "axios";
 import type {
   SearchResponse,
   Repository,
@@ -6,12 +5,9 @@ import type {
   Issue,
   CommitSearchItem,
   User,
-  SearchParams,
 } from "../types/github";
 
-const BASE_URL = "https://api.github.com/search";
-
-// Generic
+// Generic search function - now calls internal API route
 export async function searchGithub<T>(
   endpoint: string,
   query: string,
@@ -20,23 +16,47 @@ export async function searchGithub<T>(
   per_page: number = 5,
   page: number = 1,
 ): Promise<SearchResponse<T>> {
-  const params: SearchParams = {
-    q: query,
-    per_page,
-    order,
-    page,
-  };
-  if (sort) params.sort = sort;
+  try {
+    // Build query parameters for internal API
+    const searchParams = new URLSearchParams({
+      endpoint,
+      q: query,
+      order,
+      page: page.toString(),
+      per_page: per_page.toString(),
+    });
 
-  const res = await axios.get(`${BASE_URL}/${endpoint}`, {
-    params,
-    headers: {
-      Accept: "application/vnd.github+json",
-      "X-GitHub-Api-Version": "2022-11-28",
-    },
-  });
+    if (sort) {
+      searchParams.append("sort", sort);
+    }
 
-  return res.data;
+    const response = await fetch(`/api/search?${searchParams.toString()}`);
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      if (response.status === 403) {
+        console.error(
+          "GitHub API rate limit error. Please add GitHub Personal Access Token:",
+        );
+        console.error("1. Visit https://github.com/settings/tokens");
+        console.error(
+          "2. Generate new token (only need public_repo permission)",
+        );
+        console.error("3. Create .env.local file in project root");
+        console.error("4. Add: GITHUB_TOKEN=your_token_here");
+
+        throw new Error(
+          "GitHub API rate limit. Please add Personal Access Token.",
+        );
+      }
+      throw new Error(errorData.error || `API error: ${response.status}`);
+    }
+
+    return await response.json();
+  } catch (error: unknown) {
+    console.error("Search error:", error);
+    throw error;
+  }
 }
 
 // Search repositories
@@ -44,7 +64,7 @@ export async function searchRepositories(
   searchText: string = "",
   sort: "stars" | "forks" | "help-wanted-issues" | "updated" = "stars",
   order: "asc" | "desc" = "desc",
-  per_page: number = 5,
+  per_page: number = 10,
   page: number = 1,
 ): Promise<SearchResponse<Repository>> {
   const query = searchText.trim();

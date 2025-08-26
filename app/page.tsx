@@ -11,10 +11,16 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 export default function Home() {
+  const [search, setSearch] = useState("");
   const [selected, setSelected] = useState("repositories");
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    setIsLoading(false);
+  }, []);
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-background">
@@ -30,8 +36,14 @@ export default function Home() {
           <div className="w-full max-w-2xl mx-auto space-y-4">
             <div className="flex items-center gap-3 pb-4">
               <Select value={selected} onValueChange={setSelected}>
-                <SelectTrigger className="h-12 text-lg !h-12 flex items-center">
-                  <SelectValue placeholder={`Select a ${selected}`} />
+                <SelectTrigger className="text-lg !h-12 flex items-center w-40">
+                  {isLoading ? (
+                    <div className="flex items-center justify-center">
+                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-current"></div>
+                    </div>
+                  ) : (
+                    <SelectValue />
+                  )}
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="repositories">Repositories</SelectItem>
@@ -45,6 +57,8 @@ export default function Home() {
               <Input
                 placeholder={`Search GitHub ${selected}...`}
                 className="flex-1 h-12 text-lg"
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
               />
               <ModeToggle />
             </div>

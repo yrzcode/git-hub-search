@@ -1,3 +1,4 @@
+import { ResultTable } from "@/components/search-result-table";
 import { ModeToggle } from "@/components/theme-toggle";
 import { Input } from "@/components/ui/input";
 
@@ -15,13 +16,16 @@ export default function Home() {
             </p>
           </div>
 
-          <div className="w-full max-w-lg mx-auto">
+          <div className="w-full max-w-lg mx-auto space-y-4">
             <div className="flex items-center gap-3">
               <Input
                 placeholder="Search GitHub repositories..."
                 className="flex-1 h-12 text-lg"
               />
               <ModeToggle />
+            </div>
+            <div>
+              <ResultTable />
             </div>
           </div>
         </div>

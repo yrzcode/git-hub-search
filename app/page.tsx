@@ -12,6 +12,8 @@ import {
 } from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
 import { useDebounce } from "@/hooks/useDebounce";
+import { searchRepositories } from "@/lib/searchGithubAxios";
+import type { Repository, SearchResponse } from "@/types/github";
 import { useEffect, useState } from "react";
 
 export default function Home() {
@@ -19,14 +21,35 @@ export default function Home() {
   const debouncedSearch = useDebounce(search, 500);
   const [selected, setSelected] = useState("repositories");
   const [isLoading, setIsLoading] = useState(true);
-
-  useEffect(() => {
-    console.log(debouncedSearch);
-  }, [debouncedSearch]);
+  const [searchResults, setSearchResults] =
+    useState<SearchResponse<Repository> | null>(null);
+  const [isSearching, setIsSearching] = useState(false);
 
   useEffect(() => {
     setIsLoading(false);
   }, []);
+
+  useEffect(() => {
+    if (!debouncedSearch.trim()) {
+      setSearchResults(null);
+      return;
+    }
+
+    const fetchData = async () => {
+      setIsSearching(true);
+      try {
+        const data = await searchRepositories(debouncedSearch);
+        setSearchResults(data);
+      } catch (error) {
+        console.error("Search failed:", error);
+        setSearchResults(null);
+      } finally {
+        setIsSearching(false);
+      }
+    };
+
+    fetchData();
+  }, [debouncedSearch]);
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-background">
@@ -39,7 +62,7 @@ export default function Home() {
             </p>
           </div>
 
-          <div className="w-full max-w-2xl mx-auto space-y-4">
+          <div className="w-full max-w-4xl mx-auto space-y-4">
             <div className="flex items-center gap-3">
               <Select value={selected} onValueChange={setSelected}>
                 <SelectTrigger className="text-lg !h-12 flex items-center w-40">
@@ -72,7 +95,11 @@ export default function Home() {
             <Separator />
 
             <div>
-              <ResultTable />
+              <ResultTable
+                data={searchResults?.items || []}
+                isLoading={isSearching}
+                totalCount={searchResults?.total_count || 0}
+              />
             </div>
           </div>
         </div>

@@ -13,18 +13,9 @@ import {
   getSortedRowModel,
   useReactTable,
 } from "@tanstack/react-table";
-import { ArrowUpDown, MoreHorizontal } from "lucide-react";
+import { ArrowUpDown, ExternalLink, GitFork, Star } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
-import { Checkbox } from "@/components/ui/checkbox";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
 import {
   Table,
   TableBody,
@@ -33,139 +24,115 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import type { Repository } from "@/types/github";
 
-const data: Payment[] = [
+export const columns: ColumnDef<Repository>[] = [
   {
-    id: "m5gr84i9",
-    amount: 316,
-    status: "success",
-    email: "ken99@example.com",
-  },
-  {
-    id: "3u1reuv4",
-    amount: 242,
-    status: "success",
-    email: "Abe45@example.com",
-  },
-  {
-    id: "derv1ws0",
-    amount: 837,
-    status: "processing",
-    email: "Monserrat44@example.com",
-  },
-  {
-    id: "5kma53ae",
-    amount: 874,
-    status: "success",
-    email: "Silas22@example.com",
-  },
-  {
-    id: "bhqecj4p",
-    amount: 721,
-    status: "failed",
-    email: "carmella@example.com",
-  },
-];
-
-export type Payment = {
-  id: string;
-  amount: number;
-  status: "pending" | "processing" | "success" | "failed";
-  email: string;
-};
-
-export const columns: ColumnDef<Payment>[] = [
-  {
-    id: "select",
-    header: ({ table }) => (
-      <Checkbox
-        checked={
-          table.getIsAllPageRowsSelected() ||
-          (table.getIsSomePageRowsSelected() && "indeterminate")
-        }
-        onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
-        aria-label="Select all"
-      />
-    ),
-    cell: ({ row }) => (
-      <Checkbox
-        checked={row.getIsSelected()}
-        onCheckedChange={(value) => row.toggleSelected(!!value)}
-        aria-label="Select row"
-      />
-    ),
-    enableSorting: false,
-    enableHiding: false,
-  },
-  {
-    accessorKey: "status",
-    header: "Status",
-    cell: ({ row }) => (
-      <div className="capitalize">{row.getValue("status")}</div>
-    ),
-  },
-  {
-    accessorKey: "email",
+    accessorKey: "full_name",
     header: ({ column }) => {
       return (
         <Button
           variant="ghost"
           onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
         >
-          Email
+          Repository
           <ArrowUpDown />
         </Button>
       );
     },
-    cell: ({ row }) => <div className="lowercase">{row.getValue("email")}</div>,
-  },
-  {
-    accessorKey: "amount",
-    header: () => <div className="text-right">Amount</div>,
     cell: ({ row }) => {
-      const amount = parseFloat(row.getValue("amount"));
-
-      // Format the amount as a dollar amount
-      const formatted = new Intl.NumberFormat("en-US", {
-        style: "currency",
-        currency: "USD",
-      }).format(amount);
-
-      return <div className="text-right font-medium">{formatted}</div>;
+      const repo = row.original;
+      return (
+        <div className="space-y-1">
+          <div className="font-medium">
+            <a
+              href={repo.html_url}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="hover:underline flex items-center gap-1"
+            >
+              {repo.full_name}
+              <ExternalLink className="h-3 w-3" />
+            </a>
+          </div>
+          {repo.description && (
+            <div className="text-sm text-muted-foreground max-w-md truncate">
+              {repo.description}
+            </div>
+          )}
+        </div>
+      );
     },
   },
   {
-    id: "actions",
-    enableHiding: false,
+    accessorKey: "language",
+    header: "Language",
     cell: ({ row }) => {
-      const payment = row.original;
-
+      const language = row.getValue("language") as string;
       return (
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="ghost" className="h-8 w-8 p-0">
-              <span className="sr-only">Open menu</span>
-              <MoreHorizontal />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
-            <DropdownMenuLabel>Actions</DropdownMenuLabel>
-            <DropdownMenuItem
-              onClick={() => navigator.clipboard.writeText(payment.id)}
-            >
-              Copy payment ID
-            </DropdownMenuItem>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem>View customer</DropdownMenuItem>
-            <DropdownMenuItem>View payment details</DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
+        <div className="text-sm">
+          {language || <span className="text-muted-foreground">N/A</span>}
+        </div>
+      );
+    },
+  },
+  {
+    accessorKey: "stargazers_count",
+    header: ({ column }) => {
+      return (
+        <Button
+          variant="ghost"
+          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+          className="justify-end w-full"
+        >
+          Stars
+          <ArrowUpDown />
+        </Button>
+      );
+    },
+    cell: ({ row }) => {
+      const stars = row.getValue("stargazers_count") as number;
+      return (
+        <div className="text-right flex items-center justify-end gap-1">
+          <Star className="h-3 w-3" />
+          {stars.toLocaleString()}
+        </div>
+      );
+    },
+  },
+  {
+    accessorKey: "forks",
+    header: ({ column }) => {
+      return (
+        <Button
+          variant="ghost"
+          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+          className="justify-end w-full"
+        >
+          Forks
+          <ArrowUpDown />
+        </Button>
+      );
+    },
+    cell: ({ row }) => {
+      const forks = row.getValue("forks") as number;
+      return (
+        <div className="text-right flex items-center justify-end gap-1">
+          <GitFork className="h-3 w-3" />
+          {forks.toLocaleString()}
+        </div>
       );
     },
   },
 ];
 
-export function ResultTable() {
+interface ResultTableProps {
+  data: Repository[];
+  isLoading: boolean;
+  totalCount: number;
+}
+
+export function ResultTable({ data, isLoading, totalCount }: ResultTableProps) {
   const [sorting, setSorting] = React.useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
     []
@@ -194,7 +161,7 @@ export function ResultTable() {
   });
 
   return (
-    <div className="w-full">
+    <div className="w-full max-w-6xl mx-auto">
       <div className="overflow-hidden rounded-md border">
         <Table>
           <TableHeader>
@@ -238,7 +205,14 @@ export function ResultTable() {
                   colSpan={columns.length}
                   className="h-24 text-center"
                 >
-                  No results.
+                  {isLoading ? (
+                    <div className="flex items-center justify-center gap-2">
+                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-current"></div>
+                      Searching...
+                    </div>
+                  ) : (
+                    "No results found."
+                  )}
                 </TableCell>
               </TableRow>
             )}
@@ -247,8 +221,12 @@ export function ResultTable() {
       </div>
       <div className="flex items-center justify-end space-x-2 py-4">
         <div className="text-muted-foreground flex-1 text-sm">
-          {table.getFilteredSelectedRowModel().rows.length} of{" "}
-          {table.getFilteredRowModel().rows.length} row(s) selected.
+          {totalCount > 0 && (
+            <>
+              Showing {table.getRowModel().rows.length} of{" "}
+              {totalCount.toLocaleString()} repositories
+            </>
+          )}
         </div>
         <div className="space-x-2">
           <Button

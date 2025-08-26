@@ -41,12 +41,13 @@ export async function searchGithub<T>(
 
 // Search repositories
 export async function searchRepositories(
-  query: string = "react stars:>50000 language:javascript",
+  searchText: string = "",
   sort: "stars" | "forks" | "help-wanted-issues" | "updated" = "stars",
   order: "asc" | "desc" = "desc",
   per_page: number = 5,
   page: number = 1,
 ): Promise<SearchResponse<Repository>> {
+  const query = searchText.trim();
   const data = await searchGithub<Repository>(
     "repositories",
     query,

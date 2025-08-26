@@ -98,7 +98,7 @@ export const repositoryColumns: ColumnDef<Repository>[] = [
             </a>
           </div>
           {repo.description && (
-            <div className="text-sm text-muted-foreground max-w-md text-left truncate">
+            <div className="text-sm text-slate-600 dark:text-slate-400 max-w-md text-left truncate">
               {repo.description}
             </div>
           )}
@@ -113,7 +113,9 @@ export const repositoryColumns: ColumnDef<Repository>[] = [
       const language = row.getValue("language") as string;
       return (
         <div className="text-sm text-left pl-3">
-          {language || <span className="text-muted-foreground">N/A</span>}
+          {language || (
+            <span className="text-slate-500 dark:text-slate-400">N/A</span>
+          )}
         </div>
       );
     },
@@ -204,7 +206,7 @@ const createColumns = (searchType: string): ColumnDef<any>[] => {
                     <ExternalLink className="h-3 w-3" />
                   </a>
                 </div>
-                <p className="text-sm text-muted-foreground text-left truncate">
+                <p className="text-sm text-slate-600 dark:text-slate-400 text-left truncate">
                   {code.path || "No path"}
                 </p>
               </div>
@@ -326,7 +328,7 @@ const createColumns = (searchType: string): ColumnDef<any>[] => {
                     <ExternalLink className="h-3 w-3" />
                   </a>
                   {user.name && (
-                    <p className="text-sm text-muted-foreground text-left truncate">
+                    <p className="text-sm text-slate-600 dark:text-slate-400 text-left truncate">
                       {user.name}
                     </p>
                   )}
@@ -489,16 +491,18 @@ export function ResultTable({
                     </div>
                   ) : !searchQuery.trim() ? (
                     <div className="text-center py-32 h-full flex flex-col justify-center">
-                      <h3 className="text-lg font-medium text-muted-foreground mb-2">
+                      <h3 className="text-lg font-medium text-slate-700 dark:text-slate-300 mb-2">
                         Welcome to GitHub Search
                       </h3>
-                      <p className="text-sm text-muted-foreground">
+                      <p className="text-sm text-slate-600 dark:text-slate-400">
                         Search something to get started
                       </p>
                     </div>
                   ) : (
                     <div className="text-center py-32 min-h-[650px] flex flex-col justify-center">
-                      <p className="text-muted-foreground">No results found.</p>
+                      <p className="text-slate-600 dark:text-slate-400">
+                        No results found.
+                      </p>
                     </div>
                   )}
                 </TableCell>
@@ -508,7 +512,7 @@ export function ResultTable({
         </Table>
       </div>
       <div className="flex items-center justify-end space-x-2 py-4">
-        <div className="text-muted-foreground flex-1 text-sm">
+        <div className="text-slate-600 dark:text-slate-400 flex-1 text-sm">
           {totalCount > 0 && (
             <>
               Page {currentPage} • Showing{" "}
@@ -543,7 +547,7 @@ export function ResultTable({
             {pageNumbers.map((pageItem) => (
               <React.Fragment key={pageItem.key}>
                 {pageItem.value === "..." ? (
-                  <span className="px-2 py-1 text-sm text-muted-foreground">
+                  <span className="px-2 py-1 text-sm text-slate-500 dark:text-slate-400">
                     ...
                   </span>
                 ) : (

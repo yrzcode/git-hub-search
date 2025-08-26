@@ -161,7 +161,7 @@ export default function Home() {
   }, [debouncedSearch, performSearch]);
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-background">
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-100 via-blue-100 to-indigo-200 dark:from-gray-950 dark:via-blue-950 dark:to-indigo-950">
       <main className="w-full max-w-7xl mx-auto px-6">
         <div className="text-center space-y-8">
           <div className="space-y-4">
@@ -179,7 +179,7 @@ export default function Home() {
                 GitHub Search
               </span>
             </h1>
-            <p className="text-xl text-muted-foreground flex items-center justify-center gap-2">
+            <p className="text-xl text-slate-600 dark:text-slate-300 flex items-center justify-center gap-2">
               <Search className="h-5 w-5" />
               Search for GitHub {selected}
             </p>

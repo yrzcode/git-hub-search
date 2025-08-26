@@ -13,8 +13,15 @@ import {
 } from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
 import { useDebounce } from "@/hooks/useDebounce";
-import { searchRepositories } from "@/lib/searchGithubAxios";
-import type { Repository, SearchResponse } from "@/types/github";
+import { searchGithub } from "@/lib/searchGithubAxios";
+import type {
+  Repository,
+  CodeSearchItem,
+  Issue,
+  CommitSearchItem,
+  User,
+  SearchResponse,
+} from "@/types/github";
 import { RefreshCw } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
 
@@ -23,8 +30,9 @@ export default function Home() {
   const debouncedSearch = useDebounce(search, 500);
   const [selected, setSelected] = useState("repositories");
   const [isLoading, setIsLoading] = useState(true);
-  const [searchResults, setSearchResults] =
-    useState<SearchResponse<Repository> | null>(null);
+  const [searchResults, setSearchResults] = useState<SearchResponse<
+    Repository | CodeSearchItem | Issue | CommitSearchItem | User
+  > | null>(null);
   const [isSearching, setIsSearching] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const [error, setError] = useState<string | null>(null);
@@ -33,26 +41,91 @@ export default function Home() {
     setIsLoading(false);
   }, []);
 
-  const performSearch = useCallback(async (query: string, page: number = 1) => {
-    if (!query.trim()) {
-      setSearchResults(null);
-      setError(null);
-      return;
-    }
+  const performSearch = useCallback(
+    async (query: string, page: number = 1) => {
+      if (!query.trim()) {
+        setSearchResults(null);
+        setError(null);
+        return;
+      }
 
-    setIsSearching(true);
-    setError(null);
-    try {
-      const data = await searchRepositories(query, "stars", "desc", 10, page);
-      setSearchResults(data);
-    } catch (error: any) {
-      console.error("Search failed:", error);
-      setSearchResults(null);
-      setError(error.message || "Search failed, please try again later");
-    } finally {
-      setIsSearching(false);
-    }
-  }, []);
+      setIsSearching(true);
+      setError(null);
+      try {
+        let data: SearchResponse<
+          Repository | CodeSearchItem | Issue | CommitSearchItem | User
+        >;
+
+        switch (selected) {
+          case "repositories":
+            data = await searchGithub<Repository>(
+              "repositories",
+              query,
+              "stars",
+              "desc",
+              10,
+              page
+            );
+            break;
+          case "issues":
+            data = await searchGithub<Issue>(
+              "issues",
+              query,
+              "created",
+              "desc",
+              10,
+              page
+            );
+            break;
+          case "code":
+            data = await searchGithub<CodeSearchItem>(
+              "code",
+              query,
+              undefined,
+              "desc",
+              10,
+              page
+            );
+            break;
+          case "commits":
+            data = await searchGithub<CommitSearchItem>(
+              "commits",
+              query,
+              "author-date",
+              "desc",
+              10,
+              page
+            );
+            break;
+          case "users":
+            data = await searchGithub<User>(
+              "users",
+              query,
+              "followers",
+              "desc",
+              10,
+              page
+            );
+            break;
+          default:
+            throw new Error(`Unsupported search type: ${selected}`);
+        }
+
+        setSearchResults(data);
+      } catch (error: unknown) {
+        const errorMessage =
+          error instanceof Error
+            ? error.message
+            : "Search failed, please try again later";
+        console.error("Search failed:", error);
+        setSearchResults(null);
+        setError(errorMessage);
+      } finally {
+        setIsSearching(false);
+      }
+    },
+    [selected]
+  );
 
   const handlePageChange = (newPage: number) => {
     if (debouncedSearch.trim() && newPage > 0) {
@@ -66,6 +139,16 @@ export default function Home() {
       performSearch(debouncedSearch, currentPage);
     }
   };
+
+  // Reset search when search type changes
+  useEffect(() => {
+    setSearchResults(null);
+    setError(null);
+    setCurrentPage(1);
+    if (debouncedSearch.trim()) {
+      performSearch(debouncedSearch, 1);
+    }
+  }, [selected, performSearch]);
 
   useEffect(() => {
     if (!debouncedSearch.trim()) {
@@ -174,6 +257,7 @@ export default function Home() {
                 totalCount={searchResults?.total_count || 0}
                 currentPage={currentPage}
                 onPageChange={handlePageChange}
+                searchType={selected}
               />
             </div>
           </div>

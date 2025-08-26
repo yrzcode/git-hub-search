@@ -1,3 +1,4 @@
+import axios from "axios";
 import type {
   SearchResponse,
   Repository,
@@ -7,7 +8,7 @@ import type {
   User,
 } from "../types/github";
 
-// Generic search function - now calls internal API route
+// Generic search function - now calls internal API route using axios
 export async function searchGithub<T>(
   endpoint: string,
   query: string,
@@ -18,42 +19,37 @@ export async function searchGithub<T>(
 ): Promise<SearchResponse<T>> {
   try {
     // Build query parameters for internal API
-    const searchParams = new URLSearchParams({
+    const params = {
       endpoint,
       q: query,
       order,
       page: page.toString(),
       per_page: per_page.toString(),
+      ...(sort && { sort }),
+    };
+
+    const response = await axios.get("/api/search", {
+      params,
     });
 
-    if (sort) {
-      searchParams.append("sort", sort);
-    }
-
-    const response = await fetch(`/api/search?${searchParams.toString()}`);
-
-    if (!response.ok) {
-      const errorData = await response.json();
-      if (response.status === 403) {
+    return response.data;
+  } catch (error: unknown) {
+    // Handle axios errors
+    if (axios.isAxiosError(error)) {
+      if (error.response?.status === 403) {
         console.error(
           "GitHub API rate limit error. Please add GitHub Personal Access Token:",
         );
-        console.error("1. Visit https://github.com/settings/tokens");
-        console.error(
-          "2. Generate new token (only need public_repo permission)",
-        );
-        console.error("3. Create .env.local file in project root");
-        console.error("4. Add: GITHUB_TOKEN=your_token_here");
-
         throw new Error(
           "GitHub API rate limit. Please add Personal Access Token.",
         );
       }
-      throw new Error(errorData.error || `API error: ${response.status}`);
+
+      const errorMessage =
+        error.response?.data?.error || `API error: ${error.response?.status}`;
+      throw new Error(errorMessage);
     }
 
-    return await response.json();
-  } catch (error: unknown) {
     console.error("Search error:", error);
     throw error;
   }

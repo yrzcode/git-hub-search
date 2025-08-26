@@ -24,7 +24,13 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import type { Repository } from "@/types/github";
+import type {
+  Repository,
+  CodeSearchItem,
+  Issue,
+  CommitSearchItem,
+  User,
+} from "@/types/github";
 
 const generatePageNumbers = (currentPage: number, totalPages: number) => {
   const pages: Array<{ value: number | string; key: string }> = [];
@@ -61,7 +67,8 @@ const generatePageNumbers = (currentPage: number, totalPages: number) => {
   return pages;
 };
 
-export const columns: ColumnDef<Repository>[] = [
+// Repository columns
+export const repositoryColumns: ColumnDef<Repository>[] = [
   {
     accessorKey: "full_name",
     header: ({ column }) => {
@@ -130,7 +137,7 @@ export const columns: ColumnDef<Repository>[] = [
       return (
         <div className="text-right flex items-center justify-end gap-1">
           <Star className="h-3 w-3" />
-          {stars.toLocaleString()}
+          {stars?.toLocaleString() || "0"}
         </div>
       );
     },
@@ -154,7 +161,7 @@ export const columns: ColumnDef<Repository>[] = [
       return (
         <div className="text-right flex items-center justify-end gap-1">
           <GitFork className="h-3 w-3" />
-          {forks.toLocaleString()}
+          {forks?.toLocaleString() || "0"}
         </div>
       );
     },
@@ -162,12 +169,245 @@ export const columns: ColumnDef<Repository>[] = [
 ];
 
 interface ResultTableProps {
-  data: Repository[];
+  data: any[];
   isLoading: boolean;
   totalCount: number;
   currentPage: number;
   onPageChange: (page: number) => void;
+  searchType: string;
 }
+
+// Create dynamic columns based on search type
+const createColumns = (searchType: string): ColumnDef<any>[] => {
+  switch (searchType) {
+    case "repositories":
+      return repositoryColumns;
+    case "issues":
+      return [
+        {
+          accessorKey: "title",
+          header: "Issue",
+          cell: ({ row }) => {
+            const issue = row.original as Issue;
+            return (
+              <div className="space-y-1">
+                <div className="font-medium">
+                  <a
+                    href={issue.html_url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="hover:underline flex items-center gap-1"
+                  >
+                    #{issue.number}: {issue.title}
+                    <ExternalLink className="h-3 w-3" />
+                  </a>
+                </div>
+                {issue.body && (
+                  <p className="text-sm text-muted-foreground line-clamp-2">
+                    {issue.body.substring(0, 100)}...
+                  </p>
+                )}
+              </div>
+            );
+          },
+        },
+        {
+          accessorKey: "state",
+          header: "State",
+          cell: ({ row }) => {
+            const state = row.getValue("state") as string;
+            return (
+              <span
+                className={`px-2 py-1 rounded text-xs ${
+                  state === "open"
+                    ? "bg-green-100 text-green-800"
+                    : "bg-red-100 text-red-800"
+                }`}
+              >
+                {state}
+              </span>
+            );
+          },
+        },
+        {
+          accessorKey: "comments",
+          header: "Comments",
+          cell: ({ row }) => {
+            const comments = row.getValue("comments") as number;
+            return <div className="text-center">{comments || 0}</div>;
+          },
+        },
+      ];
+    case "code":
+      return [
+        {
+          accessorKey: "name",
+          header: "File",
+          cell: ({ row }) => {
+            const code = row.original as CodeSearchItem;
+            return (
+              <div className="space-y-1">
+                <div className="font-medium">
+                  <a
+                    href={code.html_url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="hover:underline flex items-center gap-1"
+                  >
+                    {code.name}
+                    <ExternalLink className="h-3 w-3" />
+                  </a>
+                </div>
+                <p className="text-sm text-muted-foreground">
+                  {code.path || "No path"}
+                </p>
+              </div>
+            );
+          },
+        },
+        {
+          accessorKey: "repository.full_name",
+          header: "Repository",
+          cell: ({ row }) => {
+            const code = row.original as CodeSearchItem;
+            return (
+              <a
+                href={code.repository?.html_url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="hover:underline text-blue-600"
+              >
+                {code.repository?.full_name || "Unknown repository"}
+              </a>
+            );
+          },
+        },
+      ];
+    case "commits":
+      return [
+        {
+          accessorKey: "commit.message",
+          header: "Commit",
+          cell: ({ row }) => {
+            const commit = row.original as CommitSearchItem;
+            return (
+              <div className="space-y-1">
+                <div className="font-medium">
+                  <a
+                    href={commit.html_url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="hover:underline flex items-center gap-1"
+                  >
+                    {commit.sha.substring(0, 7)}
+                    <ExternalLink className="h-3 w-3" />
+                  </a>
+                </div>
+                <p className="text-sm text-muted-foreground line-clamp-2">
+                  {commit.commit?.message || "No message"}
+                </p>
+              </div>
+            );
+          },
+        },
+        {
+          accessorKey: "commit.author.name",
+          header: "Author",
+          cell: ({ row }) => {
+            const commit = row.original as CommitSearchItem;
+            return <div>{commit.commit?.author?.name || "Unknown"}</div>;
+          },
+        },
+        {
+          accessorKey: "repository.full_name",
+          header: "Repository",
+          cell: ({ row }) => {
+            const commit = row.original as CommitSearchItem;
+            return (
+              <a
+                href={commit.repository?.html_url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="hover:underline text-blue-600"
+              >
+                {commit.repository?.full_name || "Unknown repository"}
+              </a>
+            );
+          },
+        },
+      ];
+    case "users":
+      return [
+        {
+          accessorKey: "login",
+          header: "User",
+          cell: ({ row }) => {
+            const user = row.original as User;
+            return (
+              <div className="flex items-center space-x-3">
+                <div className="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center text-sm font-medium">
+                  {user.login.charAt(0).toUpperCase()}
+                </div>
+                <div>
+                  <a
+                    href={user.html_url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="font-medium hover:underline flex items-center gap-1"
+                  >
+                    {user.login}
+                    <ExternalLink className="h-3 w-3" />
+                  </a>
+                  {user.name && (
+                    <p className="text-sm text-muted-foreground">{user.name}</p>
+                  )}
+                </div>
+              </div>
+            );
+          },
+        },
+        {
+          accessorKey: "type",
+          header: "Type",
+          cell: ({ row }) => {
+            const type = row.getValue("type") as string;
+            return (
+              <span
+                className={`px-2 py-1 rounded text-xs ${
+                  type === "User"
+                    ? "bg-blue-100 text-blue-800"
+                    : "bg-purple-100 text-purple-800"
+                }`}
+              >
+                {type}
+              </span>
+            );
+          },
+        },
+        {
+          accessorKey: "score",
+          header: "Relevance",
+          cell: ({ row }) => {
+            const score = row.getValue("score") as number;
+            const percentage = Math.round(score * 100);
+            return (
+              <div className="text-center">
+                <div className="text-sm font-medium">{percentage}%</div>
+                <div className="w-full bg-gray-200 rounded-full h-1.5 mt-1">
+                  <div
+                    className="bg-blue-600 h-1.5 rounded-full"
+                    style={{ width: `${percentage}%` }}
+                  ></div>
+                </div>
+              </div>
+            );
+          },
+        },
+      ];
+    default:
+      return repositoryColumns;
+  }
+};
 
 export function ResultTable({
   data,
@@ -175,6 +415,7 @@ export function ResultTable({
   totalCount,
   currentPage,
   onPageChange,
+  searchType,
 }: ResultTableProps) {
   const [sorting, setSorting] = React.useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
@@ -186,6 +427,8 @@ export function ResultTable({
 
   const totalPages = Math.ceil(Math.min(totalCount, 1000) / 10);
   const pageNumbers = generatePageNumbers(currentPage, totalPages);
+
+  const columns = createColumns(searchType);
 
   const table = useReactTable({
     data,
@@ -278,7 +521,7 @@ export function ResultTable({
               ) : (
                 "0"
               )}{" "}
-              of {Math.min(totalCount, 1000).toLocaleString()} repositories
+              of {Math.min(totalCount, 1000).toLocaleString()} {searchType}
               {totalCount > 1000 && (
                 <span className="text-xs ml-1 opacity-75">
                   (GitHub API limit: max 1000 results)

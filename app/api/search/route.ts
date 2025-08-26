@@ -44,11 +44,14 @@ export async function GET(request: NextRequest) {
 
     if (!response.ok) {
       if (response.status === 403) {
+        const hasToken = !!process.env.GITHUB_TOKEN;
         return Response.json(
           {
-            error:
-              "GitHub API rate limit exceeded. Please add GITHUB_TOKEN to .env.local",
+            error: hasToken
+              ? "GitHub API rate limit exceeded. Please try again later."
+              : "GitHub API rate limit exceeded. Please add GITHUB_TOKEN to .env.local",
             status: 403,
+            hasToken,
           },
           { status: 403 },
         );

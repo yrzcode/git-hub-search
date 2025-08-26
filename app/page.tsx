@@ -204,24 +204,24 @@ export default function Home() {
                     </h3>
                     <div className="mt-2 text-sm text-red-700 dark:text-red-300">
                       <p>{error}</p>
-                      {error.includes("rate limit") && (
-                        <div className="mt-2">
-                          <p className="mt-1">
-                            Please{" "}
-                            <a
-                              href="https://github.com/settings/tokens"
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="underline"
-                            >
-                              generate a GitHub Personal Access Token
-                            </a>{" "}
-                            (public_repo permission) and add it as
-                            NEXT_PUBLIC_GITHUB_TOKEN=your_token_here in a
-                            .env.local file.
-                          </p>
-                        </div>
-                      )}
+                      {error.includes("rate limit") &&
+                        error.includes("add GITHUB_TOKEN") && (
+                          <div className="mt-2">
+                            <p className="mt-1">
+                              Please{" "}
+                              <a
+                                href="https://github.com/settings/tokens"
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="underline"
+                              >
+                                generate a GitHub Personal Access Token
+                              </a>{" "}
+                              (public_repo permission) and add it as
+                              GITHUB_TOKEN=your_token_here in a .env.local file.
+                            </p>
+                          </div>
+                        )}
                     </div>
                   </div>
                   <Button
